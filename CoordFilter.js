@@ -20,7 +20,7 @@
             version: '2.0',
             author: 'HoQi',
             authorUrl: 'https://twscripts.dev/',
-            helpLink: 'https://forum.klanhaboru.hu/index.php?threads/intervallumos-koordináta-szűrő.6184/#post-320989',
+            helpLink: 'https://forum.tribalwars.net/',
         },
         allowedScreens: ['map'],
         isDebug: false,
@@ -36,7 +36,8 @@
         yMinLabel: 'Y min:', yMaxLabel: 'Y max:',
         runButton: 'Szűrés indítása',
         separatorLabel: 'Formátum:',
-        errorNotFound: 'Nem létező játékos/klán.',
+        playersNotFound: 'Játékosok nem találhatók:',
+        tribesNotFound: 'Klánok nem találhatók:',
         clansPlaceholder: 'Klán1;Klán2',
         playersPlaceholder: 'Játékos1;Játékos2'
     };
@@ -48,7 +49,8 @@
         yMinLabel: 'Y min:', yMaxLabel: 'Y max:',
         runButton: 'Start processing',
         separatorLabel: 'Format:',
-        errorNotFound: 'Player/tribe not found.',
+        playersNotFound: 'Players not found:',
+        tribesNotFound: 'Tribes not found:',
         clansPlaceholder: 'Tribe1;Tribe2',
         playersPlaceholder: 'Player1;Player2'
     };
@@ -146,8 +148,8 @@
         if (missingTribes.length > 0 || missingPlayers.length > 0) {
             document.getElementById('coordFilterResult').value = '';
             let msgParts = [];
-            if (missingTribes.length > 0) msgParts.push(`Klánok nem találhatók: ${missingTribes.join(', ')}`);
-            if (missingPlayers.length > 0) msgParts.push(`Játékosok nem találhatók: ${missingPlayers.join(', ')}`);
+            if (missingTribes.length > 0) msgParts.push(`${L.tribesNotFound} ${missingTribes.join(', ')}`);
+            if (missingPlayers.length > 0) msgParts.push(`${L.playersNotFound} ${missingPlayers.join(', ')}`);
             UI.ErrorMessage(msgParts.join(' | '));
             return;
         }
@@ -162,7 +164,7 @@
         const matchingVillages = villages.filter(v => allPlayerIds.includes(parseInt(v[4])));
         const filteredCoords = filterCoords(matchingVillages, xmin, xmax, ymin, ymax, separator);
 
-        // Ha nincs találat, ürítjük az eredmény mezőt (hiba esetén pl)
+        // Ha nincs találat, ürítjük az eredmény mezőt
         document.getElementById('coordFilterResult').value = filteredCoords.length > 0 ? filteredCoords.join(' ') : '';
     };
 
