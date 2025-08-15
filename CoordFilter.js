@@ -1,7 +1,11 @@
+// License: MIT
+// Copyright (c) HoQi
+// Disclaimer: By uploading a user-generated mod (script) for use with Tribal Wars, the creator grants InnoGames a perpetual, irrevocable, worldwide, royalty-free, non-exclusive license to use, reproduce, distribute, publicly display, modify, and create derivative works of the mod. This license permits InnoGames to incorporate the mod into any aspect of the game and its related services, including promotional and commercial endeavors, without any requirement for compensation or attribution to the uploader. The uploader represents and warrants that they have the legal right to grant this license and that the mod does not infringe upon any third-party rights.
+
 (async function () {
     'use strict';
 
-    // Ellenőrzés, hogy térkép képernyőn vagyunk-e, ha nem, oda irányít át
+    // Check whether we are on the map screen
     if (!/screen=map/.test(location.href)) {
         const world = window.location.href.match(/https:\/\/(.*?\.tribalwars\.[^/]+)/);
         if (world) {
@@ -12,7 +16,7 @@
         return;
     }
 
-    // Szkript konfigurációs objektum
+    // Script config
     window.scriptConfig = {
         scriptData: {
             prefix: 'coordFilter',
@@ -20,14 +24,14 @@
             version: '2.0',
             author: 'HoQi',
             authorUrl: 'https://twscripts.dev/',
-            helpLink: 'https://forum.tribalwars.net/',
+            helpLink: 'https://forum.klanhaboru.hu/index.php?threads/intervallumos-koordináta-szűrő.6184',
         },
         allowedScreens: ['map'],
         isDebug: false,
         enableCountApi: true,
     };
 
-    // Lokalizáció magyarul és angolul
+    // Localization
     const hu = {
         coordinatesFilter: 'Koordinátaszűrő',
         clansLabel: 'Klánok (pontosvesszővel):',
@@ -57,7 +61,7 @@
 
     const L = location.hostname.endsWith('.hu') ? hu : en;
 
-    // TW SDK betöltése dinamikusan
+    // Loading TWSDK
     const loadTwSDK = () => new Promise((resolve, reject) => {
         if (window.twSDK) return resolve();
         const script = document.createElement('script');
@@ -67,10 +71,9 @@
         document.head.appendChild(script);
     });
 
-    // Input szétbontása tömbbé
     const parseList = input => input.split(/[;\n]/).map(s => s.trim()).filter(Boolean);
 
-    // Koordináták szűrése a megadott határok alapján
+    // Filtering coordinates
     const filterCoords = (villages, xmin, xmax, ymin, ymax, sep) =>
         villages.map(v => `${v[2]}${sep}${v[3]}`)
                 .filter(c => {
@@ -78,7 +81,7 @@
                     return x >= xmin && x <= xmax && y >= ymin && y <= ymax;
                 });
 
-    // Felhasználói felület létrehozása
+    // Creating UI
     const createUI = () => {
         const container = document.querySelector('#map_config') || document.body;
 
@@ -117,7 +120,7 @@
         document.getElementById('coordFilterRun').addEventListener('click', runFilter);
     };
 
-    // Szűrési logika végrehajtása
+    // Filtering the actual coordinates
     const runFilter = async () => {
         const tribesInput = parseList(document.getElementById('coordFilterTribes').value);
         const playersInput = parseList(document.getElementById('coordFilterPlayers').value);
@@ -133,18 +136,18 @@
         const ymin = getVal('coordFilterYmin', -Infinity);
         const ymax = getVal('coordFilterYmax', Infinity);
 
-        // TWSDK adatok betöltése (falvak, játékosok, klánok)
+        // loading TWSDK data
         const [villages, players, tribes] = await Promise.all([
             twSDK.worldDataAPI('village'),
             twSDK.worldDataAPI('player'),
             twSDK.worldDataAPI('ally')
         ]);
 
-        // Hibakezelés: nem létező játékos/klán
+        // Tribe or player not found
         const missingTribes = tribesInput.filter(name => !tribes.some(t => t[2]?.toLowerCase() === name.toLowerCase()));
         const missingPlayers = playersInput.filter(name => !players.some(p => p[1]?.toLowerCase() === name.toLowerCase()));
 
-        // Ha érvénytelen a megadott név, ürítjük az eredmény mezőt és hibát jelezünk
+        // Throw error banner when not found
         if (missingTribes.length > 0 || missingPlayers.length > 0) {
             document.getElementById('coordFilterResult').value = '';
             let msgParts = [];
@@ -154,21 +157,17 @@
             return;
         }
 
-        // Megfelelő játékos ID-k összegyűjtése (játékos, klánok, klántagok)
+        // Collection of IDs
         const playerIds = twSDK.getEntityIdsByArrayIndex(playersInput, players, 1);
         const tribeIds = twSDK.getEntityIdsByArrayIndex(tribesInput, tribes, 2);
         const tribePlayerIds = twSDK.getTribeMembersById(tribeIds, players);
         const allPlayerIds = [...new Set([...playerIds, ...tribePlayerIds])];
 
-        // Szűrés: falvak, ahol a játékos benne van az ID listában
+        // Filter coordinates matching the filter
         const matchingVillages = villages.filter(v => allPlayerIds.includes(parseInt(v[4])));
         const filteredCoords = filterCoords(matchingVillages, xmin, xmax, ymin, ymax, separator);
-
-        // Ha nincs találat, ürítjük az eredmény mezőt
         document.getElementById('coordFilterResult').value = filteredCoords.length > 0 ? filteredCoords.join(' ') : '';
     };
-
-    // SDK betöltése, inicializálás és UI létrehozás
     await loadTwSDK();
     await window.twSDK.init(window.scriptConfig);
     createUI();
