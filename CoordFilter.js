@@ -11,7 +11,7 @@
         if (world) {
             window.location.href = `https://${world[1]}/game.php?screen=map`;
         } else {
-            UI.ErrorMessage("Ez a szkript csak a térkép képernyőn használható!");
+            UI.ErrorMessage(badScreen);
         }
         return;
     }
@@ -19,8 +19,8 @@
     // Script config
     window.scriptConfig = {
         scriptData: {
-            prefix: 'coordFilter',
-            name: 'Coord Filter',
+            prefix: 'Coordinates filter',
+            name: 'Coordinates filter',
             version: '2.0',
             author: 'HoQi',
             authorUrl: 'https://twscripts.dev/',
@@ -43,7 +43,8 @@
         playersNotFound: 'Játékosok nem találhatók:',
         tribesNotFound: 'Klánok nem találhatók:',
         clansPlaceholder: 'Klán1;Klán2',
-        playersPlaceholder: 'Játékos1;Játékos2'
+        playersPlaceholder: 'Játékos1;Játékos2',
+        badScreen: 'Ez a szkript csak a térkép képernyőn használható!'
     };
     const en = {
         coordinatesFilter: 'Coordinates filter',
@@ -56,7 +57,8 @@
         playersNotFound: 'Players not found:',
         tribesNotFound: 'Tribes not found:',
         clansPlaceholder: 'Tribe1;Tribe2',
-        playersPlaceholder: 'Player1;Player2'
+        playersPlaceholder: 'Player1;Player2',
+        badScreen: 'This script can only be used on the map screen!'
     };
 
     const L = location.hostname.endsWith('.hu') ? hu : en;
